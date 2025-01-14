@@ -51,7 +51,7 @@ jobs:
       run: |
         echo "GITHUB_REPOSITORY: ${GITHUB_REPOSITORY}, USER: ${GITHUB_REPOSITORY%/*}, PROJECT_BASE_URL: ${GITHUB_REPOSITORY#*/}"
         flutter config --no-analytics
-        flet build web --base-url ${GITHUB_REPOSITORY#*/} --route-url-strategy hash
+        flet build web --module-name app --base-url ${GITHUB_REPOSITORY#*/} --route-url-strategy hash  # Adjust entry point if needed
 
     - name: Upload Artifact
       uses: actions/upload-pages-artifact@v3
@@ -60,12 +60,13 @@ jobs:
         path: build/web
 
   deploy:
-    needs: build
+    needs: build  # wait for the "build" job to get done before executing this "deploy" job
+
     runs-on: ubuntu-latest
 
     permissions:
-      pages: write
-      id-token: write
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
 
     environment:
       name: github-pages
@@ -76,7 +77,7 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Deploy to GitHub Pages 🚀
-        if: github.event_name == 'push'
+        if: github.event_name == 'push'  # deploy only on push
         id: deployment
         uses: actions/deploy-pages@v4.0.5
         with:
