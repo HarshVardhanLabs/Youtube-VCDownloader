@@ -4,9 +4,9 @@ certifi==2024.12.14
 charset-normalizer==3.4.1
 click==8.1.8
 colorama==0.4.6
-ffmpeg==1.4
-ffmpeg-progress-yield==0.11.3
-ffmpeg-python==0.2.0
+ffmpeg
+ffmpeg-progress-yield
+ffmpeg-python
 Flask==3.1.0
 future==1.0.0
 google-api-core==2.24.0
