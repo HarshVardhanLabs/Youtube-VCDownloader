@@ -32,6 +32,9 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y ffmpeg ninja-build libgtk-3-dev
+        
+
+
 
     - name: Setup Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@v2
@@ -41,7 +44,9 @@ jobs:
     - name: Install Python Dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install --upgrade pip setuptools wheel
         pip install -r requirements.txt
+        
 
     - name: Setup Flutter ${{ env.FLUTTER_VERSION }}
       uses: subosito/flutter-action@v2
