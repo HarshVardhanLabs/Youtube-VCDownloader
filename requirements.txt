@@ -8,6 +8,9 @@ ffmpeg-progress-yield
 ffmpeg-python
 Flask==3.1.0
 future==1.0.0
+Flask>=2.1.0
+Flet>=0.5.2
+MarkupSafe>=2.1.0
 google-api-core==2.24.0
 google-api-python-client==2.158.0
 google-auth==2.37.0
@@ -17,7 +20,6 @@ httplib2==0.22.0
 idna==3.10
 itsdangerous==2.2.0
 Jinja2==3.1.5
-MarkupSafe==3.0.2
 proto-plus==1.25.0
 protobuf==5.29.3
 pyasn1==0.6.1
