@@ -106,7 +106,7 @@ def download_video():
         return jsonify({'status': 'success', 'message': 'Download and merge completed!', 'output_file': merged_path})
 
     except ffmpeg.Error as e:
-        return jsonify({'status': 'error', 'message': f'FFmpeg error: {e.stderr.decode()}'}))
+        return jsonify({'status': 'error', 'message': f'FFmpeg error: {e.stderr.decode()}'})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)})
 
