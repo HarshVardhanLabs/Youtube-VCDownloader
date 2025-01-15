@@ -16,6 +16,12 @@
         #progressSection {
             display: none;
         }
+        .metadata {
+            margin-bottom: 20px;
+        }
+        .metadata p {
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -29,6 +35,13 @@
                 <button class="btn btn-primary" type="submit">Fetch Metadata</button>
             </div>
         </form>
+
+        <!-- Video Metadata Display -->
+        <div id="metadataSection" class="metadata" style="display: none;">
+            <p><strong>Title:</strong> <span id="videoTitle"></span></p>
+            <p><strong>Description:</strong> <span id="videoDescription"></span></p>
+            <p><strong>Views:</strong> <span id="videoViews"></span></p>
+        </div>
 
         <!-- Metadata Table -->
         <div class="table-responsive">
@@ -75,6 +88,13 @@
             const data = await response.json();
 
             if (data.status === 'success') {
+                // Display video metadata
+                document.getElementById('videoTitle').textContent = data.title;
+                document.getElementById('videoDescription').textContent = data.description;
+                document.getElementById('videoViews').textContent = data.views;
+                document.getElementById('metadataSection').style.display = 'block';  // Show metadata section
+
+                // Populate formats table
                 const tableBody = document.querySelector('#formatTable tbody');
                 tableBody.innerHTML = data.formats.map(format => `
                     <tr>
