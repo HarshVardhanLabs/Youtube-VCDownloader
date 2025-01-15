@@ -10,7 +10,7 @@ app = Flask(__name__)
 API_KEY = 'AIzaSyD1OXfst-mOuAx6p-ykL2VoRLn7jC6E6KA'
 
 # Path to your cookies.txt file
-COOKIES_FILE = 'cookies.txt'
+COOKIES_FILE = 'cookies.txt'  # Ensure you have this file with the necessary cookies
 
 # Route for the homepage
 @app.route('/')
@@ -121,4 +121,4 @@ def download_video():
         return jsonify({'status': 'error', 'message': str(e)})
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
