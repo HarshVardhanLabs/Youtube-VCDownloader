@@ -37,7 +37,10 @@ def fetch_metadata():
         views = video_data['statistics']['viewCount']
 
         # Fetch available formats using yt-dlp
-        ydl_opts = {'quiet': True}
+        ydl_opts = {
+            'quiet': True,
+            'cookiesfrombrowser': 'chrome'  # Use cookies from Chrome browser
+        }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(video_url, download=False)
             formats = info_dict.get('formats', [])
@@ -85,6 +88,7 @@ def download_video():
         video_opts = {
             'format': format_id,
             'outtmpl': video_path,
+            'cookiesfrombrowser': 'chrome'  # Use cookies from Chrome browser
         }
         with yt_dlp.YoutubeDL(video_opts) as ydl:
             ydl.download([video_url])
@@ -93,6 +97,7 @@ def download_video():
         audio_opts = {
             'format': 'bestaudio',
             'outtmpl': audio_path,
+            'cookiesfrombrowser': 'chrome'  # Use cookies from Chrome browser
         }
         with yt_dlp.YoutubeDL(audio_opts) as ydl:
             ydl.download([video_url])
