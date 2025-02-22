@@ -6,29 +6,18 @@
     <title>YouTube Video Downloader</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .table-responsive {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        .progress {
-            margin-top: 20px;
-        }
-        #progressSection {
-            display: none;
-        }
-        .metadata {
-            margin-bottom: 20px;
-        }
-        .metadata p {
-            font-weight: bold;
-        }
+        .table-responsive { max-height: 400px; overflow-y: auto; }
+        .progress { margin-top: 20px; }
+        #progressSection { display: none; }
+        .metadata { margin-bottom: 20px; }
+        .metadata p { font-weight: bold; }
+        .selected { background-color: #d4edda !important; }
     </style>
 </head>
 <body>
     <div class="container mt-5">
         <h1 class="text-center">YouTube Video Downloader</h1>
 
-        <!-- Fetch Metadata Form -->
         <form id="fetchForm" class="mb-4">
             <div class="input-group">
                 <input type="text" class="form-control" name="video_url" placeholder="Enter YouTube URL" required>
@@ -36,24 +25,21 @@
             </div>
         </form>
 
-        <!-- Video Metadata Display -->
         <div id="metadataSection" class="metadata" style="display: none;">
             <p><strong>Title:</strong> <span id="videoTitle"></span></p>
             <p><strong>Description:</strong> <span id="videoDescription"></span></p>
             <p><strong>Views:</strong> <span id="videoViews"></span></p>
         </div>
 
-        <!-- Metadata Table -->
         <div class="table-responsive">
             <table id="formatTable" class="table table-bordered table-striped">
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Extension</th>
-                        <th>Resolution</th>
+                        <th>Quality</th>
                         <th>FPS</th>
                         <th>Size</th>
-                        <th>Note</th>
                         <th>Select</th>
                     </tr>
                 </thead>
@@ -61,16 +47,14 @@
             </table>
         </div>
 
-        <!-- Download Form -->
         <form id="downloadForm" class="mt-4">
             <div class="input-group mb-3">
-                <input type="text" class="form-control" id="videoUrlInput" name="video_url" placeholder="Enter YouTube URL" readonly required>
-                <input type="text" class="form-control" id="formatIdInput" name="format_id" placeholder="Enter Format ID or Select Below" readonly required>
+                <input type="text" class="form-control" id="videoUrlInput" name="video_url" readonly required>
+                <input type="text" class="form-control" id="formatIdInput" name="format_id" readonly required>
                 <button class="btn btn-success" type="submit">Download</button>
             </div>
         </form>
 
-        <!-- Progress and Status -->
         <div id="progressSection">
             <div class="progress">
                 <div id="downloadProgress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;"></div>
@@ -80,7 +64,6 @@
     </div>
 
     <script>
-        // Fetch metadata
         document.getElementById('fetchForm').onsubmit = async function (e) {
             e.preventDefault();
             const formData = new FormData(e.target);
@@ -88,66 +71,64 @@
             const data = await response.json();
 
             if (data.status === 'success') {
-                // Display video metadata
                 document.getElementById('videoTitle').textContent = data.title;
                 document.getElementById('videoDescription').textContent = data.description;
                 document.getElementById('videoViews').textContent = data.views;
-                document.getElementById('metadataSection').style.display = 'block';  // Show metadata section
-
-                // Populate formats table
+                document.getElementById('metadataSection').style.display = 'block';
+                
                 const tableBody = document.querySelector('#formatTable tbody');
-                tableBody.innerHTML = data.formats.map(format => `
-                    <tr>
-                        <td>${format.id}</td>
-                        <td>${format.ext}</td>
-                        <td>${format.resolution}</td>
-                        <td>${format.fps}</td>
-                        <td>${format.size === 'Unknown' ? 'N/A' : `${(format.size / (1024 * 1024)).toFixed(2)} MB`}</td>
-                        <td>${format.note}</td>
-                        <td><button class="btn btn-sm btn-primary selectFormat" data-id="${format.id}">Select</button></td>
-                    </tr>
-                `).join('');
+                tableBody.innerHTML = "";
 
-                document.getElementById('videoUrlInput').value = formData.get('video_url'); // Populate URL for download form
+                data.formats.forEach(f => {
+                    const row = `
+                        <tr>
+                            <td>${f.id}</td>
+                            <td>${f.ext}</td>
+                            <td>${f.quality}</td>
+                            <td>${f.fps || 'N/A'}</td>
+                            <td>${f.size || 'Unknown'}</td>
+                            <td><button class="btn btn-primary selectFormat" data-id="${f.id}">Select</button></td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+
+                document.getElementById('videoUrlInput').value = formData.get('video_url');
             } else {
                 alert(`Error: ${data.message}`);
             }
         };
 
-        // Select format from the table
         document.querySelector('#formatTable').addEventListener('click', function (e) {
             if (e.target.classList.contains('selectFormat')) {
-                const formatId = e.target.dataset.id;
-                document.getElementById('formatIdInput').value = formatId;
+                document.querySelectorAll(".selected").forEach(row => row.classList.remove("selected"));
+                e.target.closest("tr").classList.add("selected");
+                document.getElementById('formatIdInput').value = e.target.dataset.id;
             }
         });
 
-        // Download video and audio
         document.getElementById('downloadForm').onsubmit = async function (e) {
             e.preventDefault();
-            const formData = new FormData(e.target);
             document.getElementById('progressSection').style.display = 'block';
-            document.getElementById('statusMessage').textContent = 'Downloading and merging...';
             document.getElementById('downloadProgress').style.width = '0%';
-
+            document.getElementById('statusMessage').innerText = 'Downloading...';
+            
+            const eventSource = new EventSource('/progress');
+            eventSource.onmessage = function (event) {
+                const [progress, speed, eta] = event.data.split('|');
+                document.getElementById('downloadProgress').style.width = progress;
+                document.getElementById('statusMessage').innerText = `Downloading: ${progress} | Speed: ${speed} | ETA: ${eta}`;
+            };
+            
+            const formData = new FormData(e.target);
             const response = await fetch('/download_video', { method: 'POST', body: formData });
             const data = await response.json();
 
-            if (data.status === 'success') {
-                document.getElementById('statusMessage').textContent = 'Download and merge completed successfully!';
-                document.getElementById('downloadProgress').style.width = '100%';
-                const link = document.createElement('a');
-                link.href = data.output_file;
-                link.download = data.output_file.split('/').pop();
-                link.textContent = 'Click here to download the merged file';
-                document.getElementById('statusMessage').appendChild(document.createElement('br'));
-                document.getElementById('statusMessage').appendChild(link);
-            } else {
-                document.getElementById('statusMessage').textContent = `Error: ${data.message}`;
-                document.getElementById('downloadProgress').style.width = '0%';
-            }
+            eventSource.close();
+            document.getElementById('statusMessage').innerHTML = data.status === 'success'
+                ? `<a href="${data.output_file}" download>Download File</a>`
+                : `Error: ${data.message}`;
         };
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

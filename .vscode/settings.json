@@ -31,5 +31,10 @@
         ".vscode{,/**}"
     ],
     "appService.defaultWebAppToDeploy": "/subscriptions/0e00c15e-d0d0-4662-abb6-545d62a413a8/resourceGroups/MyAppsResources/providers/Microsoft.Web/sites/YoutubeVD-Downloder",
-    "appService.deploySubpath": "."
+    "appService.deploySubpath": ".",
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }
